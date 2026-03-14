@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Travel Expense Tracker",
+    "slug": "travel-expense-tracker",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.zach.travelexpensetracker"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.zach.travelexpensetracker"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "webpack"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan receipts"
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "https://travel-expense-tracker.up.railway.app",
+      "eas": {
+        "projectId": "travel-expense-tracker-production"
+      }
+    },
+    "owner": "zach",
+    "runtimeVersion": "0.1.0"
+  }
+}
