@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Secrets
+secrets/
+*.key
+*.pem
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# IDE cache
+.eslintcache
+.turbo
+
+# Generated files
+prisma/generated
+.next
+out/

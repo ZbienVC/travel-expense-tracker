@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  trips     Trip[]
+  expenses  Expense[]
+  
+  @@index([email])
+}
+
+model Trip {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  destination String?
+  
+  expenses  Expense[]
+  segments  TravelSegment[]
+  analyticsCache AnalyticsCache?
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  @@index([userId])
+  @@index([startDate, endDate])
+}
+
+model TravelSegment {
+  id        String     @id @default(cuid())
+  tripId    String
+  trip      Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  
+  type      String     // "flight", "car", "train", "bus", "walking", "other"
+  origin    String     // City/Airport code
+  destination String   // City/Airport code
+  distanceMiles Float?  // Only for ground transport
+  date      DateTime
+  
+  notes     String?
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  @@index([tripId])
+  @@index([date])
+}
+
+model Expense {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  tripId    String?
+  trip      Trip?      @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  
+  amount    Float
+  currency  String     @default("USD")
+  category  String     // "food", "transport", "accommodation", "activity", "other"
+  description String
+  
+  receiptUrl String?   // URL to receipt image
+  ocrData   String?    // Extracted text from OCR
+  
+  date      DateTime
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  @@index([userId])
+  @@index([tripId])
+  @@index([date])
+  @@index([category])
+}
+
+model AnalyticsCache {
+  id        String     @id @default(cuid())
+  tripId    String     @unique
+  trip      Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  
+  totalExpenses Float
+  expensesByCategory Json // { "food": 100, "transport": 200, ... }
+  averageDailySpend Float
+  currencyBreakdown Json // { "USD": 1200, "EUR": 500, ... }
+  
+  lastUpdated DateTime  @default(now()) @updatedAt
+  
+  @@index([tripId])
+  @@index([lastUpdated])
+}
+
+model APIRateLimit {
+  id        String     @id @default(cuid())
+  service   String     // "google-vision", "google-maps"
+  userId    String
+  
+  requestCount Int     @default(0)
+  resetAt   DateTime
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  @@unique([service, userId, resetAt])
+  @@index([service])
+  @@index([resetAt])
+}

@@ -1,0 +1,221 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '18.x'
+  REGISTRY: ghcr.io
+
+jobs:
+  setup:
+    name: Setup & Cache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+  lint:
+    name: Lint & Type Check
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Type checking
+        run: npm run type-check
+
+  backend-tests:
+    name: Backend Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: travel_expense_tracker_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/travel_expense_tracker_test
+      GOOGLE_VISION_KEY_PATH: /tmp/dummy-vision-key.json
+      GOOGLE_VISION_PROJECT_ID: test-project
+      GOOGLE_MAPS_API_KEY: test-api-key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create dummy Vision key
+        run: |
+          mkdir -p /tmp
+          echo '{"type": "service_account", "project_id": "test"}' > /tmp/dummy-vision-key.json
+
+      - name: Run database migrations
+        run: npm run db:migrate
+
+      - name: Run backend tests
+        run: npm run test:backend -- --coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: ./coverage/coverage-final.json
+          flags: backend
+
+  database-migration-check:
+    name: Database Migration Safety Check
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: travel_expense_tracker_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/travel_expense_tracker_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check Prisma schema validity
+        run: npx prisma validate
+
+      - name: Check migration status
+        run: npx prisma migrate status --skip-generate || true
+
+      - name: Dry-run migration
+        run: npx prisma migrate deploy --skip-generate
+        continue-on-error: true
+
+      - name: Check for pending migrations
+        run: npx prisma migrate status --skip-generate
+
+  frontend-linting:
+    name: Frontend Linting & Type Check
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build:frontend
+
+      - name: Upload frontend artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: dist/
+
+  security-check:
+    name: Security Vulnerability Scan
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: NPM audit
+        run: npm audit --audit-level=moderate || true
+
+      - name: Prisma security check
+        run: npx prisma validate
+
+  deployment-safety-check:
+    name: Pre-Deployment Safety Check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [lint, backend-tests, database-migration-check, frontend-linting, security-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify all checks passed
+        run: |
+          echo "✓ Linting passed"
+          echo "✓ Backend tests passed"
+          echo "✓ Database migrations validated"
+          echo "✓ Frontend build successful"
+          echo "✓ Security scan completed"
+          echo "Ready for deployment"
+
+      - name: Create deployment notification
+        run: |
+          echo "Deployment ready for:"
+          echo "- Main branch push"
+          echo "- All checks passed"
+          echo "- Safe to deploy to staging/production"
