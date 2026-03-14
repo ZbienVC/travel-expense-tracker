@@ -1,99 +1,187 @@
-# Travel Expense Tracker 🌍💰
+# Travel Expense Tracker
 
-AI-powered travel expense tracking with receipt OCR, trip analytics, and multi-currency support.
+AI-powered travel expense tracking app with receipt OCR scanning, analytics dashboard, and distance tracking.
 
-## Features
+## Features ✨
 
-- **Receipt OCR** - Automatic expense extraction from receipt images using Google Vision API
-- **Distance Tracking** - Calculate trip distances using Google Maps API
-- **Trip Analytics** - Spending breakdown by category, currency, and daily average
-- **Multi-Currency** - Track expenses in different currencies with conversion tracking
-- **Rate Limiting** - Built-in API rate limiting and cost control
-- **Database Migrations** - Type-safe schema with Prisma ORM
-- **CI/CD Pipeline** - Automated testing and deployment checks
+### Phase 1 - MVP ✅
+- Trip management (create, edit, delete)
+- Basic expense logging
+- Expense categorization
+
+### Phase 2 - Analytics & OCR 🎯 (Current)
+- **Analytics Dashboard**
+  - Pie chart: category breakdown
+  - Line chart: daily spending trends
+  - Bar chart: trip comparisons
+  - Cost per day metric
+  - Cost per mile metric
+  - Top expense categories list
+
+- **Receipt Scanning System**
+  - Image upload UI
+  - Google Vision API integration
+  - Automated extraction: merchant, amount, date
+  - Auto-fill expense form with OCR data
+  - Error handling and confidence scoring
+
+- **Updated Expense Form**
+  - Pre-fill from OCR results
+  - Manual edit fields
+  - Category auto-suggestion based on merchant
+  - Location auto-complete (ready for Google Maps)
+
+- **Distance Tracking**
+  - Travel segment tracking (flight, car, train, bus, etc.)
+  - Google Maps distance calculation
+  - Manual distance entry
+  - Cost per mile analytics
+
+- **API Endpoints**
+  - `GET /api/analytics/trip/:tripId` - Trip analytics with all metrics
+  - `GET /api/analytics/user/:userId` - User-level summary
+  - `POST /api/expenses/scan` - Receipt OCR processing
+  - `GET /api/expenses/trip/:tripId` - Trip expenses
+  - `POST /api/segments` - Add travel segments
+  - `GET /api/segments/trip/:tripId` - Trip segments with distance summary
+  - `POST /api/segments/calculate-distance` - Calculate distance via Maps API
 
 ## Tech Stack
 
-### Backend
-- **Runtime:** Node.js 18+
-- **Framework:** Express.js
-- **Database:** PostgreSQL 14+
-- **ORM:** Prisma 6.0
-- **APIs:** Google Vision, Google Maps
-- **Rate Limiting:** rate-limiter-flexible
-- **Logging:** Pino
+**Frontend:**
+- React 18 + TypeScript
+- Vite (build tool)
+- React Router for navigation
+- Recharts for data visualization
+- CSS3 Grid/Flexbox
 
-### Frontend
-- **Build:** Vite 5.0
-- **Type Safety:** TypeScript
+**Backend:**
+- Express.js (Node.js)
+- TypeScript
+- Google Vision API (OCR)
+- Google Maps API (Distance)
+- Prisma ORM
+- PostgreSQL database
 
-### DevOps
-- **CI/CD:** GitHub Actions
-- **Linting:** ESLint
-- **Testing:** Vitest
+**Infrastructure:**
+- Multer (file uploads)
+- Pino (logging)
+- Rate limiting support
 
-## Quick Start
+## Getting Started
 
-### 1. Clone & Setup
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database
+- Google Cloud Vision API credentials
+- Google Maps API key
 
+### Installation
+
+1. **Clone and install dependencies:**
 ```bash
-git clone <repo>
-cd travel-expense-tracker
 npm install
 ```
 
-### 2. Database Setup
-
+2. **Set up environment variables:**
 ```bash
-# Create PostgreSQL database
-createdb travel_expense_tracker
-
-# Run migrations
-npm run db:migrate
+cp .env.example .env
 ```
 
-### 3. Google APIs Setup
+Fill in:
+- `DATABASE_URL` - PostgreSQL connection string
+- `GOOGLE_VISION_KEY_PATH` - Path to Google Vision key JSON
+- `GOOGLE_MAPS_API_KEY` - Your Google Maps API key
 
-See detailed guides:
-- [Google Vision API Setup](./docs/GOOGLE_VISION_SETUP.md)
-- [Google Maps API Setup](./docs/GOOGLE_MAPS_SETUP.md)
-
-Quick summary:
+3. **Set up database:**
 ```bash
-# Place your Google Vision key here
-cp ~/path/to/key.json ./secrets/google-vision-key.json
-
-# Create .env
-cat > .env << EOF
-DATABASE_URL="postgresql://postgres@localhost/travel_expense_tracker"
-GOOGLE_VISION_KEY_PATH="./secrets/google-vision-key.json"
-GOOGLE_VISION_PROJECT_ID="your-project-id"
-GOOGLE_MAPS_API_KEY="your-api-key"
-EOF
+npm run db:migrate:dev
 ```
 
-### 4. Start Development
-
+4. **Start development servers:**
 ```bash
 npm run dev
-
-# Open:
-# Frontend: http://localhost:5173
-# Backend:  http://localhost:3000
-# Studio:   npm run db:studio
 ```
 
-### 5. Test Setup
+Frontend: http://localhost:5173  
+Backend API: http://localhost:3001
 
+## API Examples
+
+### Get Trip Analytics
 ```bash
-# Run all tests
-npm test
+curl http://localhost:3001/api/analytics/trip/{tripId}
+```
 
-# Backend tests with coverage
-npm run test:backend -- --coverage
+**Response:**
+```json
+{
+  "trip": {
+    "id": "trip-123",
+    "name": "Paris Summer 2024",
+    "destination": "Paris",
+    "startDate": "2024-07-01",
+    "endDate": "2024-07-15"
+  },
+  "summary": {
+    "totalExpenses": 2500.50,
+    "expenseCount": 42,
+    "tripDays": 15,
+    "totalMiles": 850.5,
+    "costPerDay": 166.70,
+    "costPerMile": 2.94
+  },
+  "categoryBreakdown": {
+    "food": 850,
+    "transport": 600,
+    "accommodation": 900,
+    "activity": 150
+  },
+  "largestCategories": [
+    {
+      "category": "accommodation",
+      "amount": 900,
+      "percentage": 36
+    }
+  ]
+}
+```
 
-# Watch mode
-npm run test:backend -- --watch
+### Scan Receipt
+```bash
+curl -X POST http://localhost:3001/api/expenses/scan \
+  -F "receipt=@receipt.jpg" \
+  -F "userId=user-123" \
+  -F "tripId=trip-123"
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "rawText": "McDonald's\n42.50 USD\n2024-07-15",
+    "merchant": "McDonald's",
+    "amount": 42.50,
+    "date": "2024-07-15",
+    "confidence": 0.95,
+    "receiptUrl": "/uploads/user-123/receipt-1721046000000.jpg"
+  }
+}
+```
+
+### Add Travel Segment
+```bash
+curl -X POST http://localhost:3001/api/segments \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tripId": "trip-123",
+    "type": "flight",
+    "origin": "JFK",
+    "destination": "CDG",
+    "date": "2024-07-01",
+    "notes": "Direct flight"
+  }'
 ```
 
 ## Project Structure
@@ -102,510 +190,164 @@ npm run test:backend -- --watch
 travel-expense-tracker/
 ├── src/
 │   ├── server/
-│   │   ├── services/
-│   │   │   ├── visionService.ts      # Google Vision OCR wrapper
-│   │   │   ├── mapsService.ts        # Google Maps distance calculation
-│   │   │   └── rateLimiter.ts        # Rate limiting & cost control
-│   │   ├── middleware/
-│   │   │   └── errorHandler.ts       # Error handling, retry logic, circuit breaker
-│   │   ├── logger.ts
-│   │   └── index.ts
+│   │   ├── index.ts              # Express app setup
+│   │   ├── logger.ts             # Pino logger config
+│   │   ├── routes/
+│   │   │   ├── analytics.ts      # Analytics endpoints
+│   │   │   ├── expenses.ts       # Expense CRUD + OCR
+│   │   │   ├── segments.ts       # Travel segments
+│   │   │   └── trips.ts          # Trip management
+│   │   └── services/
+│   │       ├── visionService.ts  # Google Vision API
+│   │       └── mapsService.ts    # Google Maps API
+│   │
 │   └── client/
-│       └── ...
+│       ├── App.tsx               # Root component
+│       ├── main.tsx              # Entry point
+│       ├── pages/
+│       │   ├── AnalyticsDashboard.tsx
+│       │   ├── ReceiptScanner.tsx
+│       │   ├── DistanceTracker.tsx
+│       │   ├── ExpenseForm.tsx
+│       │   └── TripsList.tsx
+│       ├── components/
+│       │   └── Navigation.tsx
+│       └── styles/
+│           ├── Dashboard.css
+│           ├── Scanner.css
+│           ├── DistanceTracker.css
+│           ├── ExpenseForm.css
+│           └── TripsList.css
+│
 ├── prisma/
-│   ├── schema.prisma                 # Database schema
-│   └── migrations/
-│       └── 001_initial_schema/
-├── docs/
-│   ├── GOOGLE_VISION_SETUP.md
-│   ├── GOOGLE_MAPS_SETUP.md
-│   ├── DATABASE_SETUP.md
-│   └── CI_CD_DEPLOYMENT.md
-├── .github/workflows/
-│   └── ci.yml                        # GitHub Actions pipeline
-├── .env.example
+│   ├── schema.prisma             # Database schema
+│   └── migrations/               # DB migrations
+│
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
 └── README.md
 ```
 
-## Configuration
+## Key Features Explained
 
-### Environment Variables
+### Receipt Scanning
+1. User uploads receipt image
+2. Google Vision API extracts text
+3. Smart regex parsing finds:
+   - Merchant name (first line)
+   - Amount (currency + numbers)
+   - Date (ISO format or MM/DD/YYYY)
+4. Confidence score indicates accuracy
+5. User can review and edit before saving
 
-Copy `.env.example` to `.env`:
+### Analytics Dashboard
+- Real-time calculation from expense data
+- Responsive charts using Recharts
+- Cached metrics for performance
+- Category breakdown with percentages
+- Daily/trip comparisons
 
+### Distance Tracking
+- Automatic calculation via Google Maps Distance Matrix API
+- Manual entry for non-route segments (flights)
+- Integrated cost-per-mile metric
+- Segment history with transport type
+
+## Development
+
+### Scripts
 ```bash
-cp .env.example .env
+npm run dev              # Start frontend + backend
+npm run dev:backend     # Backend only (tsx watch)
+npm run dev:frontend    # Frontend only (Vite)
+npm run build           # Build frontend + backend
+npm run db:migrate:dev  # Run DB migrations
+npm run db:studio       # Open Prisma Studio
+npm run lint            # ESLint
+npm run type-check      # TypeScript check
 ```
 
-Update with your values:
+### Adding New Features
 
-```env
-# Database
-DATABASE_URL="postgresql://postgres:password@localhost:5432/travel_expense_tracker"
+1. **Backend:**
+   - Add route in `src/server/routes/`
+   - Update Prisma schema if needed
+   - Run `npm run db:migrate:dev`
 
-# Google APIs
-GOOGLE_VISION_KEY_PATH="./secrets/google-vision-key.json"
-GOOGLE_VISION_PROJECT_ID="your-gcp-project-id"
-GOOGLE_MAPS_API_KEY="your-api-key"
+2. **Frontend:**
+   - Create component in `src/client/pages/` or `components/`
+   - Add route in `App.tsx`
+   - Style with CSS or Tailwind
 
-# Server
-PORT=3000
-NODE_ENV="development"
+## Performance Optimizations
 
-# Rate Limiting
-GOOGLE_VISION_RATE_LIMIT_PER_HOUR=1000
-GOOGLE_MAPS_RATE_LIMIT_PER_HOUR=25000
-COST_LIMIT_MONTHLY_USD=100
-
-# Optional
-LOG_LEVEL="info"
-```
-
-### Google Service Account Key
-
-**NEVER commit your keys to git!**
-
-```bash
-# Add to .gitignore (already done)
-secrets/
-.env.local
-
-# Store key securely
-mkdir -p secrets
-cp ~/Downloads/google-vision-key.json secrets/
-chmod 600 secrets/google-vision-key.json
-```
-
-## API Endpoints
-
-### Vision API (OCR)
-
-```bash
-# Extract text from receipt
-POST /api/receipts/process
-Content-Type: multipart/form-data
-file: <image>
-
-# Response
-{
-  "success": true,
-  "text": "RECEIPT\nStarbucks...",
-  "confidence": 0.95
-}
-```
-
-### Maps API
-
-```bash
-# Calculate distance
-POST /api/distances/calculate
-{
-  "origin": "New York, NY",
-  "destination": "Boston, MA"
-}
-
-# Response
-{
-  "success": true,
-  "distanceMiles": 215.46,
-  "distanceKm": 346.84,
-  "durationMinutes": 225
-}
-```
-
-### Expenses
-
-```bash
-# Create expense
-POST /api/expenses
-{
-  "tripId": "trip-id",
-  "amount": 45.50,
-  "currency": "USD",
-  "category": "food",
-  "description": "Lunch",
-  "date": "2026-03-14"
-}
-
-# Get trip expenses
-GET /api/trips/:tripId/expenses
-
-# Update expense
-PATCH /api/expenses/:id
-{
-  "description": "Updated description"
-}
-```
-
-### Analytics
-
-```bash
-# Get trip analytics
-GET /api/trips/:tripId/analytics
-
-# Response
-{
-  "totalExpenses": 2500,
-  "expensesByCategory": {
-    "food": 500,
-    "accommodation": 1200,
-    "transport": 800
-  },
-  "averageDailySpend": 83.33,
-  "currencyBreakdown": {
-    "USD": 2000,
-    "EUR": 500
-  }
-}
-```
-
-## Database Schema
-
-### Key Tables
-
-- **User** - Application users
-- **Trip** - Travel trips with dates and destinations
-- **TravelSegment** - Travel segments (flights, drives, etc.)
-- **Expense** - Individual expenses with OCR data
-- **AnalyticsCache** - Pre-computed analytics for performance
-- **APIRateLimit** - API usage tracking for cost control
-
-See [Database Setup](./docs/DATABASE_SETUP.md) for details.
-
-## Testing
-
-### Unit Tests
-
-```bash
-npm run test:backend
-```
-
-### Integration Tests
-
-Tests use a separate PostgreSQL database (`travel_expense_tracker_test`).
-
-### Test Database Setup
-
-```bash
-createdb travel_expense_tracker_test
-```
-
-Tests automatically:
-1. Run migrations
-2. Execute test suite
-3. Clean up after
+- Analytics caching in database (AnalyticsCache table)
+- Lazy loading for route components
+- Recharts optimized for large datasets
+- Rate limiting on Google APIs
+- Image compression for receipt uploads (10MB limit)
 
 ## Error Handling
 
-The app includes comprehensive error handling:
+- OCR failures gracefully display confidence scores
+- Maps API errors show helpful messages
+- Database migrations validate schema
+- File upload validation (type, size)
+- Network request retry logic
 
-### Retry Logic
+## Future Enhancements (Phase 3)
 
-Automatic retry with exponential backoff for:
-- Network timeouts (408)
-- Rate limits (429)
-- Server errors (500, 502, 503, 504)
-
-```typescript
-import { withRetry } from './middleware/errorHandler';
-
-const result = await withRetry(
-  () => callGoogleAPI(),
-  { maxAttempts: 3, initialDelayMs: 1000 }
-);
-```
-
-### Circuit Breaker
-
-Prevents cascading failures:
-
-```typescript
-const breaker = new CircuitBreaker(
-  5,      // Fail after 5 errors
-  60000   // Reset after 1 minute
-);
-
-await breaker.call(() => callFlakeyAPI());
-```
-
-### OCR Fallback
-
-If receipt OCR fails:
-
-```typescript
-// Fallback to manual entry
-const result = handleOCRFailure(error, 'manual_entry');
-// Returns: { requiresManualEntry: true, message: "..." }
-```
-
-## Rate Limiting & Cost Control
-
-### Per-Hour Limits
-
-- **Google Vision:** 1,000 requests/hour (default)
-- **Google Maps:** 25,000 requests/hour (default)
-
-### Monthly Cost Control
-
-```typescript
-const monthlyCost = await getUserMonthlyCost(userId);
-if (monthlyCost > MONTHLY_COST_LIMIT) {
-  // Prevent expensive operations
-  return res.status(402).json({ error: 'Budget exceeded' });
-}
-```
-
-Configure limits in `.env`:
-
-```env
-GOOGLE_VISION_RATE_LIMIT_PER_HOUR=1000
-GOOGLE_MAPS_RATE_LIMIT_PER_HOUR=25000
-COST_LIMIT_MONTHLY_USD=100
-```
-
-## CI/CD Pipeline
-
-GitHub Actions automatically:
-- Lints code (ESLint)
-- Type checks (TypeScript)
-- Runs tests (Vitest)
-- Validates database migrations
-- Builds frontend
-- Security scans (npm audit)
-
-See [CI/CD Deployment](./docs/CI_CD_DEPLOYMENT.md) for details.
-
-### Status Badge
-
-Add to your README:
-
-```markdown
-[![CI/CD Pipeline](https://github.com/yourusername/travel-expense-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/travel-expense-tracker/actions)
-```
-
-## Deployment
-
-### Local Deployment
-
-```bash
-npm run build
-npm run start
-# Open http://localhost:3000
-```
-
-### Heroku Deployment
-
-```bash
-heroku create your-app-name
-heroku config:set DATABASE_URL="postgresql://..."
-heroku config:set GOOGLE_MAPS_API_KEY="..."
-git push heroku main
-heroku run npm run db:migrate
-```
-
-### Vercel Deployment (Frontend)
-
-```bash
-npm i -g vercel
-vercel --prod
-```
-
-See [CI/CD Deployment](./docs/CI_CD_DEPLOYMENT.md) for more options.
+- Currency conversion
+- Shared trip budgets
+- Expense splitting
+- Mobile app (React Native)
+- Export to CSV/PDF
+- Real-time collaboration
+- AI-powered budget recommendations
 
 ## Troubleshooting
 
-### Database Connection Error
+### "Failed to connect to database"
+- Check `DATABASE_URL` in `.env`
+- Ensure PostgreSQL is running
+- Verify credentials
 
+### "Google Vision API error"
+- Verify `GOOGLE_VISION_KEY_PATH` points to valid JSON
+- Check GCP project has Vision API enabled
+- Ensure service account has proper permissions
+
+### "No text detected in receipt"
+- Image quality too low
+- Receipt not clearly visible
+- Try different angle/lighting
+
+### "Port 3001/5173 already in use"
 ```bash
-# Verify PostgreSQL is running
-psql -U postgres -c "SELECT 1"
-
-# Check DATABASE_URL
-echo $DATABASE_URL
-
-# Reset database
-npm run db:migrate
-```
-
-### Vision API Error "PERMISSION_DENIED"
-
-- Verify service account has "Vision AI User" role
-- Check API is enabled in GCP Console
-- Confirm key file path is correct
-
-See [Google Vision Setup](./docs/GOOGLE_VISION_SETUP.md#troubleshooting)
-
-### Maps API Error "REQUEST_DENIED"
-
-- Verify API key is correct
-- Check Distance Matrix API is enabled
-- Confirm IP restrictions allow your server
-
-See [Google Maps Setup](./docs/GOOGLE_MAPS_SETUP.md#troubleshooting)
-
-### Tests Failing
-
-```bash
-# Clear cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
-
-# Run tests
-npm test
-```
-
-## Development Workflow
-
-### 1. Create Feature Branch
-
-```bash
-git checkout -b feature/add-receipt-upload
-```
-
-### 2. Make Changes
-
-```bash
-npm run dev
-# Make your changes
-npm run lint
-npm test
-```
-
-### 3. Create Pull Request
-
-- All CI checks pass ✅
-- Code review approved
-- Merge to develop
-
-### 4. Merge to Main for Release
-
-- CI checks pass ✅
-- Deploy to production
-- Tag release: `git tag v0.1.0`
-
-## Performance Optimization
-
-### Database Queries
-
-Always use `include` to prevent N+1 queries:
-
-```typescript
-// ✅ Good
-const trip = await prisma.trip.findUnique({
-  where: { id },
-  include: { expenses: true, segments: true }
-});
-
-// ❌ Bad
-const trip = await prisma.trip.findUnique({ where: { id } });
-const expenses = await prisma.expense.findMany({ where: { tripId } });
-```
-
-### Caching
-
-Pre-computed analytics are cached:
-
-```typescript
-// Check cache first
-const cache = await db.analyticsCache.findUnique({ where: { tripId } });
-if (cache && cache.lastUpdated > oneDayAgo) {
-  return cache;
-}
+# Kill process on port
+lsof -ti:3001 | xargs kill -9  # macOS/Linux
+netstat -ano | findstr :3001   # Windows
 ```
 
 ## Contributing
 
-1. Fork repository
-2. Create feature branch: `git checkout -b feature/name`
-3. Commit changes: `git commit -am "Add feature"`
-4. Push to branch: `git push origin feature/name`
-5. Open Pull Request
-
-### Code Style
-
-- Use TypeScript
-- Follow ESLint rules: `npm run lint`
-- Write tests for new features
-- Update docs as needed
-
-## Costs Estimate
-
-### Monthly Cost (Per User)
-
-| Usage | Vision | Maps | Total |
-|---|---|---|---|
-| Low (100K ops) | $150 | $50 | $200 |
-| Medium (500K ops) | $750 | $250 | $1,000 |
-| High (1M ops) | $1,500 | $500 | $2,000 |
-
-**Note:** First 1,000 Vision requests/month are free.
+1. Create feature branch: `git checkout -b feature/amazing-feature`
+2. Commit changes: `git commit -m "Add amazing feature"`
+3. Push to branch: `git push origin feature/amazing-feature`
+4. Open Pull Request
 
 ## License
 
-MIT
+MIT License - see LICENSE file for details
 
 ## Support
 
-For issues or questions:
-1. Check [troubleshooting guides](./docs/)
-2. Review error messages and logs
-3. Open GitHub issue with details
+For issues and questions:
+- GitHub Issues: [Create issue]
+- Email: support@travelexpensetracker.dev
+- Documentation: [Link to docs]
 
-## API Credentials Location
+---
 
-When setup is complete, your API keys are stored at:
-
-```
-✓ Google Vision Service Key: ./secrets/google-vision-key.json
-✓ Environment Variables: ./.env
-✓ Database Connection: DATABASE_URL in .env
-✓ Maps API Key: GOOGLE_MAPS_API_KEY in .env
-```
-
-**Security Note:**
-- `secrets/` is git-ignored
-- `.env` is git-ignored
-- Never commit authentication credentials
-- Use GitHub Secrets for CI/CD
-
-## Setup Complete Checklist
-
-- [ ] Repository cloned
-- [ ] Dependencies installed: `npm install`
-- [ ] PostgreSQL database created
-- [ ] Database migrations run: `npm run db:migrate`
-- [ ] Google Vision API setup complete
-- [ ] Google Maps API setup complete
-- [ ] `.env` file created with all variables
-- [ ] Google Vision key stored in `./secrets/`
-- [ ] Development environment tested: `npm run dev`
-- [ ] Tests passing: `npm test`
-- [ ] CI/CD pipeline configured
-- [ ] GitHub Secrets configured
-- [ ] Ready for Phase 2 implementation
-
-## Next Steps
-
-Phase 2 development can now begin:
-
-1. **Frontend Implementation**
-   - Build trip dashboard
-   - Receipt upload UI
-   - Analytics visualization
-
-2. **Backend Endpoints**
-   - Expense CRUD operations
-   - Trip analytics API
-   - User management
-
-3. **Feature Integration**
-   - Hook up Vision API for OCR
-   - Integrate Maps for distance tracking
-   - Build analytics engine
-
-4. **Testing & Monitoring**
-   - Add frontend tests
-   - Set up production monitoring
-   - Configure alerts
-
-See individual documentation files for detailed information on each component.
+**Built with ❤️ using React, Express, and Google Cloud APIs**
