@@ -274,7 +274,7 @@ GET    https://travel-expense-tracker.up.railway.app/api/analytics/trip/:id
 | Railway setup | `docs/DATABASE_SETUP.md` |
 | Google APIs | `docs/GOOGLE_VISION_SETUP.md` + `docs/GOOGLE_MAPS_SETUP.md` |
 | Testing | `PRODUCTION_DEPLOYMENT.md` → Testing Instructions |
-| Troubleshooting | `DEPLOYMENT_READY.md` → Troubleshooting section |
+| Troubleshooting | `README.md` → Troubleshooting |
 
 ---
 
@@ -363,7 +363,6 @@ T+30   ─→ DONE! 🎉
   
 - **Stuck?** Read the detailed guides:
   - `PRODUCTION_DEPLOYMENT.md` (comprehensive)
-  - `DEPLOYMENT_READY.md` (reference)
   - `docs/` folder (specific topics)
 
 ---

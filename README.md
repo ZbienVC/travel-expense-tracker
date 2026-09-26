@@ -2,6 +2,20 @@
 
 AI-powered travel expense tracking app with receipt OCR scanning, analytics dashboard, and distance tracking.
 
+## Status
+
+Work in progress; not deployed. Known gaps before it runs end to end:
+
+- `npm install` fails: `express-cors@^0.2.0` does not exist on npm (the
+  server imports it; the standard package is `cors`), and `react-native@0.73`
+  pins `react@18.2.0` against the web app's `react@^18.2.0` range.
+- `package-lock.json` is gitignored, so the Dockerfile and CI (`npm ci`)
+  cannot install.
+- `npm run build` never compiles the server to `dist/server`, which is what
+  `npm start`, the Dockerfile and `railway.json` run.
+- The API has no authentication yet (`AUTH_ENABLED` is not read by the code),
+  so it should not be exposed publicly as is.
+
 ## Features ✨
 
 ### Phase 1 - MVP ✅

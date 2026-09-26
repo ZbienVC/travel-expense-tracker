@@ -59,7 +59,6 @@ prisma/
 ├── .env.example (Environment variables template)
 ├── index.html (HTML entry point)
 ├── README.md (Complete documentation)
-├── FEATURES.md (Feature checklist)
 └── DEPLOYMENT.md (This file)
 ```
 
