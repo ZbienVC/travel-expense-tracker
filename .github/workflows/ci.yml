@@ -140,14 +140,14 @@ jobs:
         run: npx prisma validate
 
       - name: Check migration status
-        run: npx prisma migrate status --skip-generate || true
+        run: npx prisma migrate status || true
 
       - name: Dry-run migration
-        run: npx prisma migrate deploy --skip-generate
+        run: npx prisma migrate deploy
         continue-on-error: true
 
       - name: Check for pending migrations
-        run: npx prisma migrate status --skip-generate
+        run: npx prisma migrate status
 
   frontend-linting:
     name: Frontend Linting & Type Check
@@ -169,7 +169,7 @@ jobs:
         run: npm run build:frontend
 
       - name: Upload frontend artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: dist/
@@ -178,6 +178,9 @@ jobs:
     name: Security Vulnerability Scan
     needs: setup
     runs-on: ubuntu-latest
+    env:
+      # prisma validate reads the datasource URL; any well-formed address works for validation.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/validate_only
     steps:
       - uses: actions/checkout@v4
 
