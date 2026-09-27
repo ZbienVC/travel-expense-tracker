@@ -1,4 +1,4 @@
-import { RateLimiterMemory, RateLimiterRes } from 'rate-limiter-flexible';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { PrismaClient } from '@prisma/client';
 import logger from '../logger';
 
@@ -43,11 +43,9 @@ export async function checkRateLimit(
 ): Promise<{ allowed: boolean; remaining: number; resetAt: Date; error?: string }> {
   try {
     const limiter = limiters[service];
-    const limit = RATE_LIMITS[service];
 
     // Get or create rate limit record
     const resetAt = new Date(Date.now() + 3600000); // Reset in 1 hour
-    const rateLimitKey = `${service}:${userId}:${resetAt.toISOString().slice(0, 13)}`;
 
     try {
       const res = await limiter.consume(userId, 1);
@@ -91,7 +89,7 @@ export async function checkRateLimit(
 async function logAPIUsage(
   service: 'google-vision' | 'google-maps',
   userId: string,
-  allowed: boolean
+  _allowed: boolean
 ): Promise<void> {
   try {
     const resetAt = new Date();

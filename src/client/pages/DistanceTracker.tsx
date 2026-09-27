@@ -26,7 +26,7 @@ interface DistanceResult {
 
 const TRANSPORT_TYPES = ['flight', 'car', 'train', 'bus', 'walking', 'other'];
 
-export default function DistanceTracker({ userId }: { userId: string }) {
+export default function DistanceTracker({ userId: _userId }: { userId: string }) {
   const { tripId } = useParams<{ tripId: string }>();
   const [segments, setSegments] = useState<TravelSegment[]>([]);
   const [loading, setLoading] = useState(true);

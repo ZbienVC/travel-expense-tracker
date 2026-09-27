@@ -1,6 +1,5 @@
 import vision from '@google-cloud/vision';
 import fs from 'fs';
-import path from 'path';
 import logger from '../logger';
 
 const client = new vision.ImageAnnotatorClient({
@@ -11,7 +10,7 @@ export interface OCRResult {
   success: boolean;
   text: string;
   confidence?: number;
-  fullResponse?: vision.protos.google.cloud.vision.v1.TextAnnotation;
+  fullResponse?: unknown;
   error?: string;
 }
 
@@ -120,7 +119,7 @@ function parseReceiptText(text: string) {
   const lines = text.split('\n');
 
   // Extract amount (look for currency symbols and numbers)
-  const amountMatch = text.match(/(?:[\$€£]|USD|EUR|GBP)\s*(\d+[\.,]\d{2})/i);
+  const amountMatch = text.match(/(?:[$€£]|USD|EUR|GBP)\s*(\d+[.,]\d{2})/i);
   const amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '.')) : null;
 
   // Extract date (simple ISO-like patterns)

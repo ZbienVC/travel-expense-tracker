@@ -12,7 +12,7 @@ const router: Router = express.Router();
 const upload = multer({
   dest: path.join(process.cwd(), 'uploads'),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
@@ -33,7 +33,7 @@ router.post('/scan', upload.single('receipt'), async (req: Request, res: Respons
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const { userId, tripId } = req.body;
+    const { userId } = req.body;
 
     if (!userId) {
       fs.unlinkSync(req.file.path);
@@ -71,7 +71,7 @@ router.post('/scan', upload.single('receipt'), async (req: Request, res: Respons
 
     const receiptUrl = `/uploads/${userId}/${fileName}`;
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         ...receiptData.data,
@@ -84,7 +84,7 @@ router.post('/scan', upload.single('receipt'), async (req: Request, res: Respons
       fs.unlinkSync(req.file.path);
     }
     logger.error(`Receipt scan error: ${error}`);
-    res.status(500).json({ error: 'Failed to process receipt' });
+    return res.status(500).json({ error: 'Failed to process receipt' });
   }
 });
 
@@ -116,10 +116,10 @@ router.post('/', async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json(expense);
+    return res.status(201).json(expense);
   } catch (error) {
     logger.error(`Expense creation error: ${error}`);
-    res.status(500).json({ error: 'Failed to create expense' });
+    return res.status(500).json({ error: 'Failed to create expense' });
   }
 });
 
@@ -136,10 +136,10 @@ router.get('/trip/:tripId', async (req: Request, res: Response) => {
       orderBy: { date: 'desc' },
     });
 
-    res.json(expenses);
+    return res.json(expenses);
   } catch (error) {
     logger.error(`Expense fetch error: ${error}`);
-    res.status(500).json({ error: 'Failed to fetch expenses' });
+    return res.status(500).json({ error: 'Failed to fetch expenses' });
   }
 });
 
@@ -159,10 +159,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Expense not found' });
     }
 
-    res.json(expense);
+    return res.json(expense);
   } catch (error) {
     logger.error(`Expense fetch error: ${error}`);
-    res.status(500).json({ error: 'Failed to fetch expense' });
+    return res.status(500).json({ error: 'Failed to fetch expense' });
   }
 });
 
@@ -185,10 +185,10 @@ router.put('/:id', async (req: Request, res: Response) => {
       },
     });
 
-    res.json(expense);
+    return res.json(expense);
   } catch (error) {
     logger.error(`Expense update error: ${error}`);
-    res.status(500).json({ error: 'Failed to update expense' });
+    return res.status(500).json({ error: 'Failed to update expense' });
   }
 });
 
@@ -204,10 +204,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
       where: { id },
     });
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     logger.error(`Expense delete error: ${error}`);
-    res.status(500).json({ error: 'Failed to delete expense' });
+    return res.status(500).json({ error: 'Failed to delete expense' });
   }
 });
 
