@@ -47,10 +47,10 @@ router.post('/', async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json(segment);
+    return res.status(201).json(segment);
   } catch (error) {
     logger.error(`Segment creation error: ${error}`);
-    res.status(500).json({ error: 'Failed to create segment' });
+    return res.status(500).json({ error: 'Failed to create segment' });
   }
 });
 
@@ -69,7 +69,7 @@ router.get('/trip/:tripId', async (req: Request, res: Response) => {
 
     const totalDistance = segments.reduce((sum, s) => sum + (s.distanceMiles || 0), 0);
 
-    res.json({
+    return res.json({
       segments,
       summary: {
         totalDistance: Math.round(totalDistance * 100) / 100,
@@ -79,7 +79,7 @@ router.get('/trip/:tripId', async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error(`Segments fetch error: ${error}`);
-    res.status(500).json({ error: 'Failed to fetch segments' });
+    return res.status(500).json({ error: 'Failed to fetch segments' });
   }
 });
 
@@ -99,10 +99,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Segment not found' });
     }
 
-    res.json(segment);
+    return res.json(segment);
   } catch (error) {
     logger.error(`Segment fetch error: ${error}`);
-    res.status(500).json({ error: 'Failed to fetch segment' });
+    return res.status(500).json({ error: 'Failed to fetch segment' });
   }
 });
 
@@ -127,10 +127,10 @@ router.put('/:id', async (req: Request, res: Response) => {
       },
     });
 
-    res.json(segment);
+    return res.json(segment);
   } catch (error) {
     logger.error(`Segment update error: ${error}`);
-    res.status(500).json({ error: 'Failed to update segment' });
+    return res.status(500).json({ error: 'Failed to update segment' });
   }
 });
 
@@ -146,10 +146,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
       where: { id },
     });
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     logger.error(`Segment delete error: ${error}`);
-    res.status(500).json({ error: 'Failed to delete segment' });
+    return res.status(500).json({ error: 'Failed to delete segment' });
   }
 });
 
@@ -171,7 +171,7 @@ router.post('/calculate-distance', async (req: Request, res: Response) => {
       return res.status(400).json({ error: result.error });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         distanceMiles: result.distanceMiles,
@@ -183,7 +183,7 @@ router.post('/calculate-distance', async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error(`Distance calculation error: ${error}`);
-    res.status(500).json({ error: 'Failed to calculate distance' });
+    return res.status(500).json({ error: 'Failed to calculate distance' });
   }
 });
 

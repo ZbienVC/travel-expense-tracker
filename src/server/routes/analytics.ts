@@ -117,10 +117,10 @@ router.get('/trip/:tripId', async (req: Request, res: Response) => {
       logger.warn(`Failed to update analytics cache: ${cacheError}`);
     }
 
-    res.json(analytics);
+    return res.json(analytics);
   } catch (error) {
     logger.error(`Analytics error: ${error}`);
-    res.status(500).json({ error: 'Failed to fetch analytics' });
+    return res.status(500).json({ error: 'Failed to fetch analytics' });
   }
 });
 
@@ -184,10 +184,10 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
       totalMiles: tripAnalytics.reduce((sum, t) => sum + t.totalMiles, 0),
     };
 
-    res.json({ summary, trips: tripAnalytics });
+    return res.json({ summary, trips: tripAnalytics });
   } catch (error) {
     logger.error(`User analytics error: ${error}`);
-    res.status(500).json({ error: 'Failed to fetch user analytics' });
+    return res.status(500).json({ error: 'Failed to fetch user analytics' });
   }
 });
 

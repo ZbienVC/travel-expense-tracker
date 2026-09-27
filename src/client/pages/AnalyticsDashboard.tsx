@@ -40,7 +40,7 @@ interface AnalyticsData {
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0'];
 
-export default function AnalyticsDashboard({ userId }: { userId: string }) {
+export default function AnalyticsDashboard({ userId: _userId }: { userId: string }) {
   const { tripId } = useParams<{ tripId: string }>();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,7 +134,7 @@ export default function AnalyticsDashboard({ userId }: { userId: string }) {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {categoryArray.map((entry, index) => (
+                {categoryArray.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

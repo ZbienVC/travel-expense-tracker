@@ -106,7 +106,7 @@ function isRetryableError(error: Error, options: RetryOptions): boolean {
   const statusMatch = error.message.match(/status[:\s]+(\d{3})/i);
   if (statusMatch) {
     const status = parseInt(statusMatch[1]);
-    return (options.retryableStatuses || DEFAULT_RETRY_OPTIONS.retryableStatuses).includes(
+    return (options.retryableStatuses || DEFAULT_RETRY_OPTIONS.retryableStatuses || []).includes(
       status
     );
   }

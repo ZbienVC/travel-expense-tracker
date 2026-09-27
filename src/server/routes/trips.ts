@@ -34,10 +34,10 @@ router.post('/', async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json(trip);
+    return res.status(201).json(trip);
   } catch (error) {
     logger.error(`Trip creation error: ${error}`);
-    res.status(500).json({ error: 'Failed to create trip' });
+    return res.status(500).json({ error: 'Failed to create trip' });
   }
 });
 
@@ -62,10 +62,10 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Trip not found' });
     }
 
-    res.json(trip);
+    return res.json(trip);
   } catch (error) {
     logger.error(`Trip fetch error: ${error}`);
-    res.status(500).json({ error: 'Failed to fetch trip' });
+    return res.status(500).json({ error: 'Failed to fetch trip' });
   }
 });
 
@@ -110,10 +110,10 @@ router.get('/user/:userId', async (req: Request, res: Response) => {
       };
     });
 
-    res.json(tripsWithSummary);
+    return res.json(tripsWithSummary);
   } catch (error) {
     logger.error(`User trips fetch error: ${error}`);
-    res.status(500).json({ error: 'Failed to fetch trips' });
+    return res.status(500).json({ error: 'Failed to fetch trips' });
   }
 });
 
@@ -136,10 +136,10 @@ router.put('/:id', async (req: Request, res: Response) => {
       },
     });
 
-    res.json(trip);
+    return res.json(trip);
   } catch (error) {
     logger.error(`Trip update error: ${error}`);
-    res.status(500).json({ error: 'Failed to update trip' });
+    return res.status(500).json({ error: 'Failed to update trip' });
   }
 });
 
@@ -155,10 +155,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
       where: { id },
     });
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (error) {
     logger.error(`Trip delete error: ${error}`);
-    res.status(500).json({ error: 'Failed to delete trip' });
+    return res.status(500).json({ error: 'Failed to delete trip' });
   }
 });
 
